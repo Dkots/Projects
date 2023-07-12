@@ -28,14 +28,14 @@
 #define FLAG_SHOW_AABB      32
 
 // Task 2
-//--- Γείτονες του κόμβου ---//
+//--- Neighbors of the node ---//
 struct vertex_neighbours {
 	std::vector<int> vertex;
 	std::vector<int> triangles;
 	std::vector<math::vec> N_surface;
 };
 // Task 3
-//--- Δυαδικό διάνυσμα ---//
+//--- Binary vector ---//
 struct dual_vertice {
 	math::vec dual_v;
 	int index_vec;
@@ -47,30 +47,30 @@ struct dual_vertice {
 	double p = 0; // protrusion degree
 	bool read;
 };
-//--- Κόμβος σωρού ---//
+//--- Heap node ---//
 struct heap_node {
 	int index_vec;
 	double geodesic;
 };
-//--- Κλάση του σωρού ---//
+//--- Heap class ---//
 class Heap {
 public:
-	/* Αρχικοποίηση του σωρού*/
+	/* Initializing the heap*/
 	void HEAP_init(int i);
-	/* Αφαίρεση ρίζας*/
+	/* Remove*/
 	heap_node HEAP_pop();
-	/* Ανακατάταξη κόμβων όταν αλλάζει τιμή ένας από αυτούς*/
+	/* Reorder nodes when one of them changes value*/
 	void change_data(int i, double x);
-	/* Εκπτύπωση σωρού*/
+	/* Print*/
 	void HEAP_print();
-	/* Αλλάγη τιμή των κόμβων*/
+	/* Change Value*/
 	void swap_heap_node(heap_node& dv1, heap_node& dv2);
-	/* Μήκος σωρού*/
+	/* length heap*/
 	int plithos;
-	/* Διάνυσμα σωρού*/
+	/* heap vector*/
 	std::vector<heap_node> heap_D; // heap
 };
-//--- Κύρια κλάση ---//
+//--- Main class ---//
 class Mesh3DScene : public vvr::Scene
 {
 public:
@@ -86,118 +86,118 @@ private:
 	void Tasks();
 
 	//---Task 0---//
-	/* Υπολογίζει και αποθηκεύει τις καμπυλότητες σε αρχεία .txt του συνόλου εκπαίδευσης*/
+	/* Computes and saves the curvatures to .txt files of the training set*/
 	void load_dataset_curves();
-	/* Υπολογίζει και αποθηκεύει τις καμπυλότητες σε αρχεία .txt του συνόλου δοκιμής*/
+	/* Calculates and saves the curvatures to .txt files of the test set*/
 	void load_test_set_curves();
-	/* Ξεχωρίζει και αποθηκεύει τις φυσικοχημικές ιδιότητες σε αρχεία .txt του συνόλου εκπαίδευσης*/
+	/* Extracts and saves the physicochemical properties to .txt files of the training set*/
 	void load_physhiomedical_properties_dataset();
-	/* Ξεχωρίζει και αποθηκεύει τις φυσικοχημικές ιδιότητες σε αρχεία .txt του συνόλου δοκιμής*/
+	/* Extracts and saves the physicochemical properties in .txt files of the test setς*/
 	void load_physhiomedical_properties_test_set();
-	/* Εύρεση μέγιστης και ελάχιστης τιμής σε ένα διάνυσμα*/
+	/* Find the maximum and minimum value in a vector*/
 	std::vector<double> find_max_min_value(std::vector<double> VecList);
-	/* Εκπτύπωση διανύσματος VectorXf*/
+	/* Print VectorXf vector*/
 	void print_VectorXf(Eigen::VectorXf& v);
-	/* Εκπτύπωση διανύσματος MatrixXf*/
+	/* Print MatrixXf vector*/
 	void print_MatrixXf(Eigen::MatrixXf& arr);
-	/* Υπολογισμός του σφάλματος δύο διανυσμάτων*/
+	/* Calculation of the error of two vectors*/
 	float calc_error(Eigen::VectorXf& v1, Eigen::VectorXf& v2);
-	/* Εύρεση της θέσης της μέγιστης τιμής*/
+	/* Finding the location of the maximum value*/
 	int max_index(Eigen::VectorXf v);
-	/* Εύρεση της θέσης της μικρότερης τιμής*/
+	/* Finding the location of the maximum value*/
 	int min_index(Eigen::VectorXf v);
-	/* Ορίζουμε τα διανύσματα ομάδων με τις σωστές ταξινομήσεις πρωτεΐνων*/
+	/* We define the group vectors with the correct protein classifications*/
 	Eigen::VectorXf build_c_correct(int teams[5], int size_c);
-	/* Κανονικοποίηση διανύσματος VectorXf*/
+	/* VectorXf normalization*/
 	void normalize_VectorXf(Eigen::VectorXf& v);
 
 	//---Task 1---//
-	/* Αποθήκευση σε διανύσματα τις φυσικοχημικές ιδιότητες των πρωτεΐνων*/
+	/* Storing in vectors the physicochemical properties of proteins*/
 	void open_physicochemical_properties(std::string file, std::vector<double>& m_properties_col_0, std::vector<double>& m_properties_col_1, std::vector<double>& m_properties_col_2);
-	/* Εύρεση μέσης τιμής και τοποθέτησει στο αντίστοιχο τρίγωνο*/
+	/* Find the mean value and place it in the corresponding triangle*/
 	void find_median_value_triangle(std::vector<double>& properties_col, std::vector<double>& median_value_vector);
-	/* Συναρτήσεις τοποθέτησης χρώματος για τις τρεις ιδιότητες*/
+	/* Color placement functions for the three properties*/
 	void find_colour_face_0(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face);
 	void find_colour_face_1(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face);
 	void find_colour_face_2(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face);
 
 	//---Task 2---//
-	/* Συνάρτηση υπολογισμού καμπυλοτήτων*/
+	/* Curvature calculation function*/
 	void calc_gauss_mean_curve();
-	/* Κατασκευή ενός διανύσματος της δομής vertex_neighbours*/
+	/* Construct a vector of the vertex_neighbors structure*/
 	void find_vertex_neighbours(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList);
-	/* Υπολογισμός καμπυλότητας gauss*/
+	/* Calculate gauss curvature */
 	void calc_gauss_curve(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList, std::vector<double>& K_gauss_curve);
-	/* Υπολογισμός του normal διανυσμάτων σε μία επιφάνεια*/
+	/* Calculate normal vectors in one surface*/
 	math::vec calc_normal_surface(math::vec u, math::vec ui, math::vec ui_n);
-	/* Εύρεση των normal διανυσμάτων*/
+	/* Find normal vectors*/
 	void find_Normal_vertices_surface(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList);
-	/* Υπολογισμός καμπυλότητας mean*/
+	/* Calculate mean curvature*/
 	void calc_mean_curve(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList, std::vector<double>& H_mean_curve);
-	/* Συναρτήσεις τοποθέτησης χρώματος για τις καμπυλότητες*/
+	/* Color placement functions for curvatures*/
 	void find_colour_face_gauss(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face);
 	void find_colour_face_mean(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face);
 
 	//---Task 3---//
-	/* Εύρεση των διανυσμάτων του δυαδικού γράφου*/
+	/* Finding the vectors of the binary graph*/
 	void find_dual_vertices();
-	/* Εύρεση των γειτονικών τριγώνων*/
+	/* Finding adjacent triangles*/
 	void find_neigh_triangles();
-	/* Έλεγχος αν είναι γειτονικά*/
+	/* Check if they are adjacent*/
 	bool is_neighboors_triangles(vvr::Triangle& tri1, vvr::Triangle& tri2);
-	/* Υπολογισμός του βαθμού προεξοχής*/
+	/* Calculating the salience degree*/
 	void find_protrusion_degree();
-	/* Αλγόριθμος Dijkstra*/
+	/* Dijkstra Algorithm*/
 	void dijkstra(int i);
-	/*Αλγόριθμος N-rings*/
+	/*N-rings Algorithm*/
 	void N_ring_algorithm();
 
 	//---Task 4---//
-	/* Προσθήκη του ιστουγράμματος του αντικειμένου σε έναν πίνακα MatrixXf*/
+	/* Adding the histogram of the object to a MatrixXf array*/
 	void add_histObj_MatrixXf();
-	/* Υπολογισμός του πίνακα ανομοιομορφίας*/
+	/* Calculate dissimilarity matrix*/
 	void calc_dissimilarity_matrix(Eigen::MatrixXf& arr, Eigen::MatrixXf& diss_Matrix);
-	/* Υπολογισμός του ιστογράμματος*/
+	/* Calculation of the histogram*/
 	void calc_histogramm(double min_value, double max_value, std::vector<double>& data, Eigen::VectorXf& hist, std::string name);
-	/* ’νοιγμα του αρχείου που περιέχει την καμπυλότητα του αντικειμένου και προσθήκηκ σε ένα διάνυσμα*/
+	/* Open the file containing the curvature of the object and addc to a vector*/
 	void open_curves(std::string file, std::vector<double>& K_curve);
-	/* Προσθήκη του ιστουγράμματος του αντικειμένου σε έναν πίνακα MatrixXf*/
+	/* Adding the histogram of the object to a MatrixXf array*/
 	void add_histProtein(int index, Eigen::MatrixXf& histogramms_Proteins);
-	/* Υπολογισμός του πίνακα ανομοιομορφίας των πρωτεϊνών*/
+	/* Calculation of the protein dissimilarity matrix*/
 	void calc_dissimilarity_matrix_combination(Eigen::MatrixXf& gauss, Eigen::MatrixXf& mean, Eigen::MatrixXf& diss_Matrix, std::string name, float pr_gauss);
 
 	//---Task 5---//
-	/* ’νοιγμα αρχείου που περιέχει τον πίνακα ανομοιομορφίας*/
+	/* Open file containing disparity matrix*/
 	void open_dissimilarity_matrix(std::string file, Eigen::MatrixXf& diss_Matrix);
-	/* Υπολογισμός του πίνακα ομοιομορφίας των πρωτεϊνών με συγκεκριμένο κατώφλι*/
+	/* Calculation of protein similarity matrix with specific threshold*/
 	void similar_protein(float T, std::string name);
-	/* Ταξινόμηση πρωτεϊνων*/
+	/* Protein classification*/
 	float classification_protein(int teams[5], std::string name);
 
 	//---Task 6---//
-	/* ’νοιγμα αρχείου που περιέχει το ιστόγραμμα του αντικειμένου*/
+	/* Open a file containing the histogram of the object*/
 	void open_hist(std::string name, Eigen::VectorXf& hist);
-	/* ’νοιγμα αρχείου που περιέχει την ταξινόμηση των πρωτεϊνων σε ομάδες*/
+	/* Open a file containing the classification of proteins into groups*/
 	void open_class_weight_gauss(Eigen::VectorXf& c, std::string name);
-	/* Εύρεση της πιο όμοιας πρωτεΐνης και προσθήκη σε διάνυσμα*/
+	/* Find the most similar protein and add to a vector*/
 	void find_similar_vector();
-	/* Υπολογισμός ποσοστού ανάκτησης*/
+	/* Recovery rate calculation*/
 	void retriaval_degree(int teams[5]);
 
 	//---Task 7---//
-	/* Υπολογισμός του πίνακα ανομοιομορφίας για τις φυσικοχημικές ιδιότητες*/
+	/* Calculation of the disparity matrix for the physicochemical properties*/
 	void calc_dissimilarity_matrix_prop(Eigen::MatrixXf& arr_histogramms, Eigen::MatrixXf& diss_matrix, std::string name);
-	/* Υπολογισμός του πίνακα ανομοιομορφίας για όλες τις φυσικοχημικές ιδιότητες*/
+	/* Calculation of the disparity matrix for all physicochemical properties*/
 	void calc_dissimilarity_matrix_prop_total(std::string name);
-	/* Υπολογισμός του πίνακα ομοιομορφίας των πρωτεϊνών με συγκεκριμένο κατώφλι για τις φυσικοχημικές ιδιότητες*/
+	/* Calculation of the protein uniformity matrix with a certain threshold for the physicochemical properties*/
 	void similar_prop(float T, Eigen::MatrixXf& diss_matrix, std::string name);
-	/* Ταξινόμηση πρωτεϊνων*/
+	/* Protein classification*/
 	void classification_protein_prop(Eigen::MatrixXf& diss_matrix, Eigen::VectorXf& c);
-	/* Εύρεση της πιο όμοιας πρωτεΐνης και προσθήκη σε διάνυσμα σύμφωνα με τις φυσικοχημικές ιδιότητες*/
+	/* Finding the most similar protein and adding it to a vector according to the physicochemical properties*/
 	void find_similar_vector_prop(Eigen::VectorXf& Vec_similar, std::string propertie);
-	/* Εύρεση της πιο όμοιας πρωτεΐνης και προσθήκη σε διάνυσμα για όλες τις φυσικοχημικές ιδιότητες*/
+	/* Finding the most similar protein and adding to a vector for all physicochemical properties*/
 	void find_similar_vector_prop_total();
-	/* Υπολογισμός ποσοστού ανάκτησης*/
+	/* Calculate retrival rate*/
 	void retriaval_degree_prop(Eigen::VectorXf& Vec_similar, Eigen::VectorXf& c);
 
 private:
@@ -215,139 +215,139 @@ private:
 
 	//---Task 1---//
 	// Prop 0
-	std::vector<double> m_properties_col_0; // Διάνυσμα φυσικοχημικής ιδιότητας 0 
-	std::vector<double> median_value_col_0; // Διάνυσμα με τις τιμές του κάθε τριγώνου
-	std::vector<vvr::Colour> colour_face_0; // Διάνυσμα με τα χρώματα του κάθε τριγώνου
-	double max_value_col_0; // Μέγιστη τιμή της φυσικοχημικής ιδιότητας 0 
-	double min_value_col_0; // Ελάχιστη τιμή της φυσικοχημικής ιδιότητας 0 
+	std::vector<double> m_properties_col_0; // Biological attribute vector 0 
+	std::vector<double> median_value_col_0; // Vector with each value of triangle
+	std::vector<vvr::Colour> colour_face_0; // Vector with the color of each triangle
+	double max_value_col_0; // Max value 0 
+	double min_value_col_0; // Min Value 0 
 	// Prop 1
-	std::vector<double> m_properties_col_1; // Διάνυσμα φυσικοχημικής ιδιότητας 1
-	std::vector<double> median_value_col_1; // Διάνυσμα με τις τιμές του κάθε τριγώνου
-	std::vector<vvr::Colour> colour_face_1; // Διάνυσμα με τα χρώματα του κάθε τριγώνου
-	double max_value_col_1; // Μέγιστη τιμή της φυσικοχημικής ιδιότητας 1
-	double min_value_col_1; // Ελάχιστη τιμή της φυσικοχημικής ιδιότητας 1 
+	std::vector<double> m_properties_col_1; // Biological attribute vector 1
+	std::vector<double> median_value_col_1; // Vector with each value of triangle
+	std::vector<vvr::Colour> colour_face_1; // Vector with the color of each triangle
+	double max_value_col_1; // Max value 1
+	double min_value_col_1; //  Min Value 1 
 	// Prop 2
-	std::vector<double> m_properties_col_2; // Διάνυσμα φυσικοχημικής ιδιότητας 2
-	std::vector<double> median_value_col_2; // Διάνυσμα με τις τιμές του κάθε τριγώνου
-	std::vector<vvr::Colour> colour_face_2; // Διάνυσμα με τα χρώματα του κάθε τριγώνου
-	double max_value_col_2; // Μέγιστη τιμή της φυσικοχημικής ιδιότητας 2
-	double min_value_col_2; // Ελάχιστη τιμή της φυσικοχημικής ιδιότητας 2
-	// Αντικείμενα με τις ιδιότητες της πρωτείνης 
+	std::vector<double> m_properties_col_2; // Biological attribute vector 2
+	std::vector<double> median_value_col_2; // Vector with each value of triangle
+	std::vector<vvr::Colour> colour_face_2; // Vector with the color of each triangle
+	double max_value_col_2; // Max value 2
+	double min_value_col_2; // Min Value 2
+	//  Objects with the features of proteins
 	vvr::Mesh m_model_col_0, m_model_col_1, m_model_col_2;
 
 	//---Task 2---//
-	std::vector<vertex_neighbours> m_NeighboursList; // Διάνυσμα που περιέχει τους γειτόνους του κάθε διανύσματος
+	std::vector<vertex_neighbours> m_NeighboursList; // Vector which involves the neighbors
 	// Gauss
-	std::vector<double> K_gauss_curve; // Διάνυσμα καμπυλότητας gauss
-	double max_value_K; // Μέγιστη τιμή καμπυλότητα gauss
-	double min_value_K; // Ελάχιστη τιμή καμπυλότητα gauss
-	std::vector<double> median_value_K; // Διάνυσμα με τις τιμές του κάθε τριγώνου
-	std::vector<vvr::Colour> colour_K; // Διάνυσμα με τα χρώματα του κάθε τριγώνου
+	std::vector<double> K_gauss_curve; // Vector gauss curvature
+	double max_value_K; // Max gauss value
+	double min_value_K; // Min gauss value
+	std::vector<double> median_value_K; // Vector with each value of triangle 
+	std::vector<vvr::Colour> colour_K; // Vector with the color of each triangle
 	// Mean
-	std::vector<double> H_mean_curve; // Διάνυσμα καμπυλότητας mean
-	double max_value_H; // Μέγιστη τιμή καμπυλότητα mean
-	double min_value_H; // Ελάχιστη τιμή καμπυλότητα mean
-	std::vector<double> median_value_H; // Διάνυσμα με τις τιμές του κάθε τριγώνου
-	std::vector<vvr::Colour> colour_H; // Διάνυσμα με τα χρώματα του κάθε τριγώνου
-	// Αντικείμενα για αναπαράσταση
+	std::vector<double> H_mean_curve; // Vector mean curvature
+	double max_value_H; // Max mean value
+	double min_value_H; // Min mean value
+	std::vector<double> median_value_H; // Vector with each value of triangle 
+	std::vector<vvr::Colour> colour_H; // Vector with the color of each triangle
+	// Showcasing objects
 	vvr::Mesh m_model_gauss, m_model_mean;
 
 	//---Task 3---//
-	std::vector<dual_vertice> Graph; // Διάνυσμα με τα δυαδικά διανύσματα
-	Heap heap_Dij; // Σωρός για τον αλγόριθμο Dijkstra
-	double max_p; // Μέγιστη τιμή του βαθμού προεξοχής
-	std::vector<int> is_projection; // Διάνυσμα αν είναι σημείο προεξοχής = 1
+	std::vector<dual_vertice> Graph; // Vector with dual_vertices
+	Heap heap_Dij; // Heap for Dijkstra
+	double max_p; // Max value
+	std::vector<int> is_projection; // Vectro if is a projection point
 
 	//---Task 4---//
-	//-- Ερώτημα i --//
-	//- Αρμαντίλο -//
+	//-- Question i --//
+	//- Armantilo -//
 	vvr::Mesh m_model_1;
 	std::vector<vertex_neighbours> m_NeighList_1;
 	std::vector<double> K_1;
-	//- Μονόκαιρος -//
+	//- Monokairos -//
 	vvr::Mesh m_model_2;
 	std::vector<vertex_neighbours> m_NeighList_2;
 	std::vector<double> K_2;
-	//- Κουνέλι -//
+	//- Kouneli -//
 	vvr::Mesh m_model_3;
 	std::vector<vertex_neighbours> m_NeighList_3;
 	std::vector<double> K_3;
-	// Μέγιστη και ελάχιστη καμπυλότητα
+	// Max and min curvature
 	double max_Gauss;
 	double min_Gauss;
 	double max_Mean;
 	double min_Mean;
-	// Ιστογράμματα
+	// Histogramm
 	Eigen::VectorXf hist_obj_1;
 	Eigen::VectorXf hist_obj_2;
 	Eigen::VectorXf hist_obj_3;
-	Eigen::MatrixXf histogramm_Obj; // Πίνακας με τα τρία ιστογράμματα
-	// Πίνακας ανομοιομορφίας για τα τρία αντικείμενα
+	Eigen::MatrixXf histogramm_Obj; // Matrix with three histogramm
+	// Dissinilarity matrix of three objects 
 	Eigen::MatrixXf dissimilarity_matrix;
-	//-- Ερώτημα ii --//
-	vvr::Mesh m_model_protein; // Μοντέλο πρωτεΐνης
+	//-- Question ii --//
+	vvr::Mesh m_model_protein; // Protein Model
 	std::vector<vertex_neighbours> m_NeighList_protein;
 	std::vector<double> K_protein;
 	std::vector<double> H_protein;
-	// Ιστογράμματα
-	Eigen::VectorXf hist_obj_protein; // Βοηθητικό διάνυσμα
-	Eigen::MatrixXf histogramms_Proteins_Gauss; // Τα ιστογράμματα πρωτεϊνων εκπαίδευσης καμπυλότητας gauss 
-	Eigen::MatrixXf histogramms_Proteins_Mean; // Τα ιστογράμματα πρωτεϊνων εκπαίδευσης καμπυλότητας mean
-	// Πίνακας ανομοιομορφίας σύμφωνα με τις καμπυλότητες
+	// Histogramms
+	Eigen::VectorXf hist_obj_protein; // Default vector
+	Eigen::MatrixXf histogramms_Proteins_Gauss; // Histogramms of training proteins gauss curvature 
+	Eigen::MatrixXf histogramms_Proteins_Mean; // Histogramms of training proteins mean curvature 
+	// Disiimilarity matrix of the proteins
 	Eigen::MatrixXf dissimilarity_matrix_proteins;
 
 	//---Task 5---//
-	// Πίνακας ομοιομορφίας σύμφωνα με τις καμπυλότητες
+	// Disiimilarity matrix of the proteins
 	Eigen::MatrixXf dissimilarity_matrix_proteins_bool;
 
 	//---Task 6---//
-	Eigen::VectorXf Vec_similar_protein; // Διάνυσμα με τις ομάδες που βρίσκονται οι πρωτεΐνες δοκιμής
-	Eigen::VectorXf similar_test_data; // Βοηθητικό διάνυσμα
-	// Βοηθητικά διανύσματα για την σύγκριση του συνόλου δοκιμής με το σύνολο εκπαίδευσης
+	Eigen::VectorXf Vec_similar_protein; // Vector which has the testing labels 
+	Eigen::VectorXf similar_test_data; // Default Vector
+	// Default Vectors
 	Eigen::VectorXf hist_obj_protein_dataset_gauss; 
 	Eigen::VectorXf hist_obj_protein_dataset_mean;
 	Eigen::VectorXf hist_obj_protein_testset_gauss;
 	Eigen::VectorXf hist_obj_protein_testset_mean;
 
 	//---Task 7---//
-	// Διανύσματα με τις φυσικοχημικές ιδιότητες της πρωτεΐνης
+	// Vectors with the biological attributes of proteins
 	std::vector<double> protein_properties_col_0;
 	std::vector<double> protein_properties_col_1;
 	std::vector<double> protein_properties_col_2;
-	// Μέγιστες και ελάχιστες τιμές
+	// Max and Min Values
 	double max_col_0;
 	double min_col_0;
 	double max_col_1;
 	double min_col_1;
 	double max_col_2;
 	double min_col_2;
-	// Ιστογράμματα
+	// Histogramm
 	Eigen::VectorXf hist_properties_col_0;
 	Eigen::VectorXf hist_properties_col_1;
 	Eigen::VectorXf hist_properties_col_2;
-	// Πίνακες ιστογραμμάτων
+	// Matrix of histogramms
 	Eigen::MatrixXf arr_hist_properties_col_0;
 	Eigen::MatrixXf arr_hist_properties_col_1;
 	Eigen::MatrixXf arr_hist_properties_col_2;
 	// task 4 //
-	// Πίνακες ανομοιομορφίας
+	// Disiimilarity matries
 	Eigen::MatrixXf diss_properties_col_0;
 	Eigen::MatrixXf diss_properties_col_1;
 	Eigen::MatrixXf diss_properties_col_2;
 	Eigen::MatrixXf diss_properties_total;
 	// task 5
-	// Πίνακας ομοιομορφίας
+	// Disiimilarity matrix
 	Eigen::MatrixXf diss_matrix_prop_bool;
-	// Ταξινόμηση των πρωτεΐνων σε ομάδες ανάλογα τις φυσικοχημικές ιδιότητες
+	// Categorizes the proteins according to labels
 	Eigen::VectorXf c_prop_0;
 	Eigen::VectorXf c_prop_1;
 	Eigen::VectorXf c_prop_2;
 	Eigen::VectorXf c_prop_total;
 	// task 6
-	// Διανύσματα με τις ομάδες που βρίσκονται οι πρωτεΐνες δοκιμής
+	// Vectors which have the labels 
 	Eigen::VectorXf Vec_similar_protein_col_0;
 	Eigen::VectorXf Vec_similar_protein_col_1;
 	Eigen::VectorXf Vec_similar_protein_col_2;
 	Eigen::VectorXf Vec_similar_protein_col_total;
-	Eigen::VectorXf similar_test_data_prop; // Βοηθητικό διάνυσμα
+	Eigen::VectorXf similar_test_data_prop; // Default Vector
 };

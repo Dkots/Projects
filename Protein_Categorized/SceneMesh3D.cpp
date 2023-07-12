@@ -1,26 +1,26 @@
 #include "SceneMesh3D.h"
 
-// 0: Προεπεξεργασία
-// 1: Ερώτημα 1
-// 2: Ερώτημα 2
-// 3: Ερώτημα 3 ή 31 (Διαφορά στο draw())
-// 41: Ερώτημα 4i
-// 42: Ερώτημα 4ii
-// 5: Ερώτημα 5
-// 6: Ερώτημα 6
-// 7: Ερώτημα 7
+// 0: Preprocessing
+// 1: Question 1
+// 2: Question 2
+// 3: Question 3 or 31 (Diff in draw())
+// 41: Question 4i
+// 42: Question 4ii
+// 5: Question 5
+// 6: Question 6
+// 7: Question 7
 #define TASK 0
-#define ON_FILE 1		// Αποθήκευση δεδομένων σε αρχεία
-#define HIST_SIZE 50	// Αριθμός υποδιαστημάτων
-#define WEIGHT_GAUSS 1  // Βάρος της καμπυλότητας gauss
-#define T 0.002 		// Κατώφλι όμοιων πρωτεΐνων
+#define ON_FILE 1		// Save data to files
+#define HIST_SIZE 50	// Number of subintervals
+#define WEIGHT_GAUSS 1	// Weight of gauss curvature
+#define T 0.002			// Threshold of similar proteins
 
-// Συντομεύσεις
+// Shortcuts
 using namespace std;
 using namespace vvr;
 using namespace Eigen;
 
-// Κατεύθυνση αρχείων
+// File path
 //---Task 0---//
 const string objDirDataset = getBasePath() + "resources/dataset/surfaces/";
 const string objDirTestset = getBasePath() + "resources/test_set/surfaces/";
@@ -29,10 +29,10 @@ const string objDirPropTestset= getBasePath() + "resources/test_set/properties/"
 //---Task 1---//
 const string obj = "armadillo_low_low"; // Αριθμός Πρωτεΐνης
 const string Set = "obj"; // Σύνολο
-// Κατεύθυνση της πρωτεΐνης
+// Path for protein
 const string objDirSurfaces = getBasePath() + "resources/" + Set + "/surfaces/";
 const string objFileSurf = objDirSurfaces + obj +".obj";
-// Κατεύθυνση των ιδιοτήτων
+// Path for attributes
 const string objDirProperties = getBasePath() + "resources/" + Set + "/properties/";
 const string objFileProp = objDirProperties + obj +".txt";
 //---Task 3---//
@@ -40,13 +40,13 @@ const string objDir = getBasePath() + "resources/" + Set + "/";
 const string objFile = objDir + obj + ".obj";
 //---Task 4I---//
 const string objDir41 = getBasePath() + "resources/obj/";
-// Αντικείμενο 1
+// Object 1
 const string objFile1 = objDir41 + "armadillo_low_low.obj";
-// Αντικείμενο 2
+// Object 2
 const string objFile2 = objDir41 + "unicorn_low_low.obj";
-// Αντικείμενο 3
+// Object 3
 const string objFile3 = objDir41 + "bunny_low.obj";
-// Αποθήκευση Ιστογραμμάτων
+// Storing histogramms
 const string hist_obj1 = getBasePath() + "resources/histogram/Task4i/Object1.txt";
 const string hist_obj2 = getBasePath() + "resources/histogram/Task4i/Object2.txt";
 const string hist_obj3 = getBasePath() + "resources/histogram/Task4i/Object3.txt";
@@ -94,7 +94,7 @@ void Mesh3DScene::resize()
 
 void Mesh3DScene::Tasks()
 {
-	// Ποεπεξεργασία
+	// Preprocessing
 	if (TASK == 0) {
 		cout << "load dataset curveture" << endl;
 		load_dataset_curves();
@@ -107,9 +107,9 @@ void Mesh3DScene::Tasks()
 	}
 	//---Task 1---//
 	else if (TASK == 1) {
-		// Τοποθέτηση ιδιοτήτων σε διανύσματα
+		// Define the biological features in 3d vector
 		open_physicochemical_properties(objFileProp, m_properties_col_0, m_properties_col_1, m_properties_col_2);
-		//// Εύρεση των τιμών και του χρώματος που θα πάρει το κάθε τρίγωνο 
+		//// Finding the values and color in which each of the triangles will take
 		//propertie col 0
 		vector<double> vd0 = find_max_min_value(m_properties_col_0);
 		min_value_col_0 = vd0[0];
@@ -128,7 +128,7 @@ void Mesh3DScene::Tasks()
 		max_value_col_2 = vd2[1];
 		find_median_value_triangle(m_properties_col_2, median_value_col_2);
 		find_colour_face_2(median_value_col_2, colour_face_2);
-		//// Αναπαράσταση, αλλάγη θέσης των πρωτεινών
+		//// Showcase protein
 		for (int i = 0; i < m_model.getVertices().size(); i++) {
 			vec v(-30, 0, 0);
 			m_model.getVertices()[i] = m_model.getVertices()[i] + v;
@@ -164,9 +164,9 @@ void Mesh3DScene::Tasks()
 	}
 	//---Task 2---//
 	else if (TASK == 2) {
-		// Υπολογισμός gauss και mean καμπυλότητας
+		// Calculate gauss and mean curvature 
 		calc_gauss_mean_curve();
-		//// Αναπαράσταση, αλλάγη θέσης των πρωτεινών
+		//// Showcase protein
 		// Gauss
 		m_model_gauss = m_model_original;
 		m_model_gauss.setBigSize(getSceneWidth() / 2);
@@ -202,7 +202,7 @@ void Mesh3DScene::Tasks()
 		hist_obj_3 = Eigen::VectorXf::Zero(HIST_SIZE);
 		histogramm_Obj = Eigen::MatrixXf::Zero(3, HIST_SIZE);
 		dissimilarity_matrix = Eigen::MatrixXf::Zero(3, 3);
-		// Αντικείμενο 1
+		// Object 1
 		cout << "Load object 1" << endl;
 		m_model_1 = vvr::Mesh(objFile1);
 		find_vertex_neighbours(m_model_1, m_NeighList_1);
@@ -212,7 +212,7 @@ void Mesh3DScene::Tasks()
 		double max_K_1 = vd_K1[1];
 		min_Gauss = min_K_1;
 		max_Gauss = max_K_1;
-		// Αντικείμενο 2
+		// Object 2
 		cout << "Load object 2" << endl;
 		m_model_2 = vvr::Mesh(objFile2);
 		find_vertex_neighbours(m_model_2, m_NeighList_2);
@@ -226,7 +226,7 @@ void Mesh3DScene::Tasks()
 		if (min_Gauss < min_K_2) {
 			min_Gauss = min_K_2;
 		}
-		// Αντικείμενο 3
+		// Object 3
 		cout << "Load object 3" << endl;
 		m_model_3 = vvr::Mesh(objFile3);
 		find_vertex_neighbours(m_model_3, m_NeighList_3);
@@ -240,7 +240,7 @@ void Mesh3DScene::Tasks()
 		if (min_Gauss < min_K_3) {
 			min_Gauss = min_K_3;
 		}
-		// Κανονικοποίηση
+		// Normalization
 		calc_histogramm(min_Gauss, max_Gauss, K_1, hist_obj_1, hist_obj1);
 		cout << "Histogramm object 1" << endl;
 		print_VectorXf(hist_obj_1);
@@ -250,7 +250,7 @@ void Mesh3DScene::Tasks()
 		calc_histogramm(min_Gauss, max_Gauss, K_3, hist_obj_3, hist_obj1);
 		cout << "Histogramm object 3" << endl;
 		print_VectorXf(hist_obj_3);
-		// Υπολογισμός dissimilarity matrix
+		// Calculate dissimilarity matrix
 		add_histObj_MatrixXf();
 		calc_dissimilarity_matrix(histogramm_Obj, dissimilarity_matrix);
 		cout << "Print dissimilarity matrix" << endl;
@@ -285,7 +285,7 @@ void Mesh3DScene::Tasks()
 			H_protein.clear();
 			add_histProtein(i, histogramms_Proteins_Mean);
 		}
-		// Υπολογισμός dissimilarity matrix
+		// Calculate dissimilarity matrix
 		cout << "Calculate dissmilarity Matrix" << endl;
 		string op = "gauss_mean_" + to_string(static_cast<int>(WEIGHT_GAUSS*10)) + ".txt";
 		string name = getBasePath() + "resources/curvature_dissimilarity_matrix/arrays/" + op;
@@ -312,7 +312,7 @@ void Mesh3DScene::Tasks()
 	}
 	//---Task 6---//
 	else if (TASK == 6) {
-		// Υπολογισμός ιστογραμματων καμπυλοτητων test_set
+		// Calculate curvature histogramm test_set
 		if (ON_FILE == 1) {
 			cout << "Calculate histogramm test set" << endl;
 			max_Gauss = 216.969;
@@ -478,15 +478,15 @@ void Mesh3DScene::Tasks()
 }
 
 // Task 0
-/* Υπολογίζει και αποθηκεύει τις καμπυλότητες σε αρχεία .txt του συνόλου εκπαίδευσης*/
+/* Computes and saves the curvatures to .txt files of the training set*/
 void Mesh3DScene::load_dataset_curves() {
 	for (int i = 0; i < 369; i++) {
-		// Φόρτωση αντίστοιχου αντικειμένου
+		// Load object
 		string name = to_string(i) + ".obj";
 		cout << name << endl;
 		const string objFile = objDirDataset + name;
 		m_model_protein = vvr::Mesh(objFile);
-		// Υπολογισμός Gauss και Mean
+		// Calculate Gauss and Mean
 		find_vertex_neighbours(m_model_protein, m_NeighList_protein);
 		find_Normal_vertices_surface(m_model_protein, m_NeighList_protein);
 		calc_gauss_curve(m_model_protein, m_NeighList_protein, K_protein);
@@ -541,7 +541,7 @@ void Mesh3DScene::load_dataset_curves() {
 		K_protein.clear();
 		H_protein.clear();
 	}
-	// Αποθήκευση μέγιστης και ελάχιστης τιμής
+	// Store max and min value
 	string op_Km = getBasePath() + "resources/curvature/dataset/Gauss/min_max.txt";
 	string op_Hm = getBasePath() + "resources/curvature/dataset/Mean/min_max.txt";
 	ofstream myfile1(op_Km);
@@ -557,15 +557,15 @@ void Mesh3DScene::load_dataset_curves() {
 	}
 	else cout << "Unable to open file";
 }
-/* Υπολογίζει και αποθηκεύει τις καμπυλότητες σε αρχεία .txt του συνόλου δοκιμής*/
+/* Calculates and saves the curvatures to .txt files of the test set*/
 void Mesh3DScene::load_test_set_curves() {
 	for (int i = 0; i < 41; i++) {
-		// Φόρτωση αντίστοιχου αντικειμένου
+		// Load object
 		string name = to_string(i) + ".obj";
 		cout << name << endl;
 		const string objFile = objDirTestset + name;
 		m_model_protein = vvr::Mesh(objFile);
-		// Υπολογισμός Gauss και Mean
+		// Calculate Gauss and Mean
 		find_vertex_neighbours(m_model_protein, m_NeighList_protein);
 		find_Normal_vertices_surface(m_model_protein, m_NeighList_protein);
 		calc_gauss_curve(m_model_protein, m_NeighList_protein, K_protein);
@@ -620,7 +620,7 @@ void Mesh3DScene::load_test_set_curves() {
 		K_protein.clear();
 		H_protein.clear();
 	}
-	// Αποθήκευση μέγιστης και ελάχιστης τιμής
+	// Store max and min value
 	string op_Km = getBasePath() + "resources/curvature/test_set/Gauss/min_max.txt";
 	string op_Hm = getBasePath() + "resources/curvature/test_set/Mean/min_max.txt";
 	ofstream myfile1(op_Km);
@@ -636,14 +636,14 @@ void Mesh3DScene::load_test_set_curves() {
 	}
 	else cout << "Unable to open file";
 }
-/* Ξεχωρίζει και αποθηκεύει τις φυσικοχημικές ιδιότητες σε αρχεία .txt του συνόλου εκπαίδευσης*/
+/* Extracts and saves the physicochemical properties to .txt files of the training set*/
 void Mesh3DScene::load_physhiomedical_properties_dataset() {
 	for (int i = 0; i < 369; i++) {
-		// Φόρτωση φυσιοχημικών ιδιοτήτων ενός αντικειμένου
+		// Load biological features 
 		string name = to_string(i) + ".txt";
 		cout << name << endl;
 		const string objFile = objDirPropDataset + name;
-		// ’νοιγμα αρχείων ιδιοτήτων
+		// Open files
 		open_physicochemical_properties(objFile, protein_properties_col_0, protein_properties_col_1, protein_properties_col_2);
 		vector<double> vd_0 = find_max_min_value(protein_properties_col_0);
 		vector<double> vd_1 = find_max_min_value(protein_properties_col_1);
@@ -681,7 +681,7 @@ void Mesh3DScene::load_physhiomedical_properties_dataset() {
 			min_col_2 = min_c2;
 		}
 	}
-	// Αποθήκευση μέγιστης και ελάχιστης τιμής
+	// Store max and min value
 	string op0 = getBasePath() + "resources/properties/dataset/prop_0_min_max.txt";
 	string op1 = getBasePath() + "resources/properties/dataset/prop_1_min_max.txt";
 	string op2 = getBasePath() + "resources/properties/dataset/prop_2_min_max.txt";
@@ -708,14 +708,14 @@ void Mesh3DScene::load_physhiomedical_properties_dataset() {
 	protein_properties_col_2.clear();
 
 }
-/* Ξεχωρίζει και αποθηκεύει τις φυσικοχημικές ιδιότητες σε αρχεία .txt του συνόλου δοκιμής*/
+/* Extracts and saves the physicochemical properties in .txt files of the test setς*/
 void Mesh3DScene::load_physhiomedical_properties_test_set() {
 	for (int i = 0; i < 41; i++) {
-		// Φόρτωση φυσιοχημικών ιδιοτήτων ενός αντικειμένου
+		// Load biological features 
 		string name = to_string(i) + ".txt";
 		cout << name << endl;
 		const string objFile = objDirPropTestset + name;
-		// ’νοιγμα αρχείων ιδιοτήτων
+		// Open files
 		open_physicochemical_properties(objFile, protein_properties_col_0, protein_properties_col_1, protein_properties_col_2);
 		vector<double> vd_0 = find_max_min_value(protein_properties_col_0);
 		vector<double> vd_1 = find_max_min_value(protein_properties_col_1);
@@ -753,7 +753,7 @@ void Mesh3DScene::load_physhiomedical_properties_test_set() {
 			min_col_2 = min_c2;
 		}
 	}
-	// Αποθήκευση μέγιστης και ελάχιστης τιμής
+	// Store max and min value
 	string op0 = getBasePath() + "resources/properties/test_set/prop_0_min_max_test.txt";
 	string op1 = getBasePath() + "resources/properties/test_set/prop_1_min_max_test.txt";
 	string op2 = getBasePath() + "resources/properties/test_set/prop_2_min_max_test.txt";
@@ -779,7 +779,7 @@ void Mesh3DScene::load_physhiomedical_properties_test_set() {
 	protein_properties_col_1.clear();
 	protein_properties_col_2.clear();
 }
-/* Εύρεση μέγιστης και ελάχιστης τιμής σε ένα διάνυσμα*/
+/* Find the maximum and minimum value in a vector*/
 vector<double> Mesh3DScene::find_max_min_value(vector<double> VecList) {
 	double max_v = 0;
 	double min_v = 100;
@@ -794,7 +794,7 @@ vector<double> Mesh3DScene::find_max_min_value(vector<double> VecList) {
 	vector<double> min_max = { min_v, max_v };
 	return min_max;
 }
-/* Εκπτύπωση διανύσματος VectorXf*/
+/* Print VectorXf vector*/
 void Mesh3DScene::print_VectorXf(Eigen::VectorXf& v) {
 	for (int i = 0; i < v.rows(); i++) {
 		cout << setw(4);
@@ -802,7 +802,7 @@ void Mesh3DScene::print_VectorXf(Eigen::VectorXf& v) {
 	}
 	cout << endl;
 }
-/* Εκπτύπωση διανύσματος MatrixXf*/
+/* Print MatrixXf vector*/
 void Mesh3DScene::print_MatrixXf(Eigen::MatrixXf& arr) {
 	for (int i = 0; i < arr.rows(); i++) {
 		for (int j = 0; j < arr.cols(); j++) {
@@ -813,7 +813,7 @@ void Mesh3DScene::print_MatrixXf(Eigen::MatrixXf& arr) {
 	}
 	cout << endl;
 }
-/* Υπολογισμός του σφάλματος δύο διανυσμάτων*/
+/*Calculation of the error of two vectors*/
 float Mesh3DScene::calc_error(Eigen::VectorXf& v1, Eigen::VectorXf& v2) {
 	VectorXf s = VectorXf::Zero(v1.rows());
 	for (int i = 0; i < v1.rows(); i++) {
@@ -822,7 +822,7 @@ float Mesh3DScene::calc_error(Eigen::VectorXf& v1, Eigen::VectorXf& v2) {
 	float sum_s = s.sum();
 	return sum_s;
 }
-/* Εύρεση της θέσης της μέγιστης τιμής*/
+/* Finding the location of the maximum value*/
 int Mesh3DScene::max_index(Eigen::VectorXf v) {
 	int m = 0;
 	int ind = 0;
@@ -834,7 +834,7 @@ int Mesh3DScene::max_index(Eigen::VectorXf v) {
 	}
 	return ind;
 }
-/* Εύρεση της θέσης της μικρότερης τιμής*/
+/* Finding the location of the maximum value*/
 int Mesh3DScene::min_index(Eigen::VectorXf v) {
 	float m = 1.1;
 	int ind = 0;
@@ -846,7 +846,7 @@ int Mesh3DScene::min_index(Eigen::VectorXf v) {
 	}
 	return ind;
 }
-/* Ορίζουμε τα διανύσματα ομάδων με τις σωστές ταξινομήσεις πρωτεΐνων*/
+/*We define the group vectors with the correct protein classifications*/
 Eigen::VectorXf Mesh3DScene::build_c_correct(int teams[5], int size_c) {
 	VectorXf c_correct = VectorXf::Zero(size_c);
 	for (int i = 0; i < size_c; i++) {
@@ -859,7 +859,7 @@ Eigen::VectorXf Mesh3DScene::build_c_correct(int teams[5], int size_c) {
 	}
 	return c_correct;
 }
-/* Κανονικοποίηση διανύσματος VectorXf*/
+/* VectorXf normalization*/
 void Mesh3DScene::normalize_VectorXf(Eigen::VectorXf& v) {
 	float max_val = v.maxCoeff();
 	for (int i = 0; i < v.rows(); i++) {
@@ -869,7 +869,7 @@ void Mesh3DScene::normalize_VectorXf(Eigen::VectorXf& v) {
 
 
 //---Task 1---//
-/* Αποθήκευση σε διανύσματα τις φυσικοχημικές ιδιότητες των πρωτεΐνων*/
+/* Storing in vectors the physicochemical properties of proteins*/
 void Mesh3DScene::open_physicochemical_properties(string file, std::vector<double>& m_properties_col_0, std::vector<double>& m_properties_col_1, std::vector<double>& m_properties_col_2) {
 	ifstream myReadFile;
 	myReadFile.open(file);
@@ -893,7 +893,7 @@ void Mesh3DScene::open_physicochemical_properties(string file, std::vector<doubl
 	}
 	myReadFile.close();
 }
-/* Εύρεση μέσης τιμής και τοποθέτησει στο αντίστοιχο τρίγωνο*/
+/* Find the mean value and place it in the corresponding triangle*/
 void Mesh3DScene::find_median_value_triangle(std::vector<double>& properties_col, std::vector<double>& median_value_vector) {
 	vector<vec> vertices = m_model.getVertices();
 	vector<vvr::Triangle> triangles = m_model.getTriangles();
@@ -917,7 +917,7 @@ void Mesh3DScene::find_median_value_triangle(std::vector<double>& properties_col
 		}
 	}
 }
-/* Συναρτήσεις τοποθέτησης χρώματος για τις τρεις ιδιότητες*/
+/* Color placement functions for the three properties*/
 void Mesh3DScene::find_colour_face_0(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face) {
 	for (int i = 0; i < median_value_vector.size(); i++) {
 		if (median_value_vector[i] >= 0) {
@@ -962,7 +962,7 @@ void Mesh3DScene::find_colour_face_2(std::vector<double>& median_value_vector, s
 }
 
 //---Task 2---//
-/* Συνάρτηση υπολογισμού καμπυλοτήτων*/
+/* Curvature calculation function*/
 void Mesh3DScene::calc_gauss_mean_curve() {
 	find_vertex_neighbours(m_model, m_NeighboursList);
 	find_Normal_vertices_surface(m_model, m_NeighboursList);
@@ -981,7 +981,7 @@ void Mesh3DScene::calc_gauss_mean_curve() {
 	find_median_value_triangle(H_mean_curve, median_value_H);
 	find_colour_face_mean(median_value_H, colour_H);
 }
-/* Κατασκευή ενός διανύσματος της δομής vertex_neighbours*/
+/* Construct a vector of the vertex_neighbors structure*/
 void Mesh3DScene::find_vertex_neighbours(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList) {
 	for (int i = 0; i < m_model.getVertices().size(); i++) {
 		vertex_neighbours vn1;
@@ -992,11 +992,11 @@ void Mesh3DScene::find_vertex_neighbours(vvr::Mesh m_model, std::vector<vertex_n
 		int v1 = triangles[i].vi1;
 		int v2 = triangles[i].vi2;
 		int v3 = triangles[i].vi3;
-		// Πρόσθεση τριγώνου στο m_NeighboursList[v_]
+		// Adding triangle to m_NeighborsList[v_]
 		m_NeighboursList[v1].triangles.push_back(i);
 		m_NeighboursList[v2].triangles.push_back(i);
 		m_NeighboursList[v3].triangles.push_back(i);
-		// Πρόσθεση γειτονικών σημείων στο m_NeighboursList[v_]
+		// Adding neighbors to m_NeighborsList[v_]
 		// v1
 		m_NeighboursList[v1].vertex.push_back(v2);
 		m_NeighboursList[v1].vertex.push_back(v3);
@@ -1007,9 +1007,9 @@ void Mesh3DScene::find_vertex_neighbours(vvr::Mesh m_model, std::vector<vertex_n
 		m_NeighboursList[v3].vertex.push_back(v1);
 		m_NeighboursList[v3].vertex.push_back(v2);
 	}
-	// Τοποθέτηση στην σειρά τους κόμβους
+	// Placing the nodes in order
 	for (int i = 0; i < m_NeighboursList.size(); i++) {
-		// Αλλαγή θέσεων
+		// Changing positions
 		for (int j = 1; j < m_NeighboursList[i].vertex.size(); j += 2) {
 			for (int k = j + 1; k < m_NeighboursList[i].vertex.size(); k++) {
 				if (m_NeighboursList[i].vertex[j] == m_NeighboursList[i].vertex[k]) {
@@ -1051,7 +1051,7 @@ void Mesh3DScene::find_vertex_neighbours(vvr::Mesh m_model, std::vector<vertex_n
 		}
 	}
 }
-/* Υπολογισμός καμπυλότητας gauss*/
+/* Calculate gauss curvature */
 void Mesh3DScene::calc_gauss_curve(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList, std::vector<double>& K_gauss_curve) {
 	vector<vec>& vertices = m_model.getVertices();
 	vector<vvr::Triangle>& triangles = m_model.getTriangles();
@@ -1069,13 +1069,13 @@ void Mesh3DScene::calc_gauss_curve(vvr::Mesh m_model, std::vector<vertex_neighbo
 		K_gauss_curve.push_back(K);
 	}
 }
-/* Υπολογισμός του normal διανυσμάτων σε μία επιφάνεια*/
+/* Calculate normal vectors in one surface*/
 vec Mesh3DScene::calc_normal_surface(math::vec u, math::vec ui, math::vec ui_n) {
 	vec num = (ui - u).Cross(ui_n - u);
 	vec N = num.Normalized();
 	return N;
 }
-/* Εύρεση των normal διανυσμάτων*/
+/* Find normal vectors*/
 void Mesh3DScene::find_Normal_vertices_surface(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList) {
 	vector<vec>& vertices = m_model.getVertices();
 	for (int i = 0; i < vertices.size(); i++) {
@@ -1087,7 +1087,7 @@ void Mesh3DScene::find_Normal_vertices_surface(vvr::Mesh m_model, std::vector<ve
 		}
 	}
 }
-/* Υπολογισμός καμπυλότητας mean*/
+/* Calculate mean curvature*/
 void Mesh3DScene::calc_mean_curve(vvr::Mesh m_model, std::vector<vertex_neighbours>& m_NeighboursList, std::vector<double>& H_mean_curve) {
 	vector<vec>& vertices = m_model.getVertices();
 	vector<vvr::Triangle>& triangles = m_model.getTriangles();
@@ -1108,7 +1108,7 @@ void Mesh3DScene::calc_mean_curve(vvr::Mesh m_model, std::vector<vertex_neighbou
 		H_mean_curve.push_back(H);
 	}
 }
-/* Συναρτήσεις τοποθέτησης χρώματος για τις καμπυλότητες*/
+/* Color placement functions for curvatures*/
 void Mesh3DScene::find_colour_face_gauss(std::vector<double>& median_value_vector, std::vector<vvr::Colour>& colour_face) {
 	for (int i = 0; i < median_value_vector.size(); i++) {
 		if (median_value_vector[i] >= 0) {
@@ -1134,7 +1134,7 @@ void Mesh3DScene::find_colour_face_mean(std::vector<double>& median_value_vector
 }
 
 //---Task 3---//
-/* Εύρεση των διανυσμάτων του δυαδικού γράφου*/
+/* Finding the vectors of the binary graph*/
 void Mesh3DScene::find_dual_vertices() {
 	cout << "find_dual_vertices()" << endl;
 	int size_triangles = m_model.getTriangles().size();
@@ -1150,7 +1150,7 @@ void Mesh3DScene::find_dual_vertices() {
 		Graph.push_back(dv);
 	}
 }
-/* Εύρεση των γειτονικών τριγώνων*/
+/* Finding adjacent triangles*/
 void Mesh3DScene::find_neigh_triangles() {
 	cout << "find_neigh_triangles()" << endl;
 	vector<vvr::Triangle>& triangles = m_model.getTriangles();
@@ -1170,10 +1170,10 @@ void Mesh3DScene::find_neigh_triangles() {
 					// +1 count
 					Graph[ind_j].count_neigh++;
 					Graph[ind_k].count_neigh++;
-					// Γειτονικα διανύσματα
+					// Neighboring vectors
 					Graph[ind_j].neigh_dual_vec[Graph[ind_j].count_neigh] = ind_k;
 					Graph[ind_k].neigh_dual_vec[Graph[ind_k].count_neigh] = ind_j;
-					// Απόσταση
+					// distance
 					double dist = Graph[ind_j].dual_v.Distance(Graph[ind_k].dual_v);
 					Graph[ind_j].distances[Graph[ind_j].count_neigh] = dist;
 					Graph[ind_k].distances[Graph[ind_k].count_neigh] = dist;
@@ -1182,13 +1182,13 @@ void Mesh3DScene::find_neigh_triangles() {
 		}
 	}
 }
-/* Έλεγχος αν είναι γειτονικά*/
+/* Check if they are adjacent*/
 bool Mesh3DScene::is_neighboors_triangles(vvr::Triangle& tri1, vvr::Triangle& tri2) {
-	// Πρώτο τρίγωνο
+	// First triangle
 	vector<int> tri1_vec = { tri1.vi1, tri1.vi2, tri1.vi3 };
-	// Δεύτερο τρίγωνο
+	// Second triangle
 	vector<int> tri2_vec = { tri2.vi1, tri2.vi2, tri2.vi3 };
-	// Έλεγχος
+	// Check
 	for (int i = 0; i < 3; i++) {
 		int p1 = tri1_vec[i];
 		int p2 = tri1_vec[(i+1)%3];
@@ -1202,7 +1202,7 @@ bool Mesh3DScene::is_neighboors_triangles(vvr::Triangle& tri1, vvr::Triangle& tr
 	}
 	return false;
 }
-/* Υπολογισμός του βαθμού προεξοχής*/
+/* Calculating the salience degree*/
 void Mesh3DScene::find_protrusion_degree() {
 	max_p = 0;
 	int size_heap = Graph.size();
@@ -1223,7 +1223,7 @@ void Mesh3DScene::find_protrusion_degree() {
 		Graph[i].p /= max_p;
 	}
 }
-/* Αλγόριθμος Dijkstra*/
+/* Dijkstra Algorithm*/
 void Mesh3DScene::dijkstra(int i) {
 	while (heap_Dij.plithos > 0) {
 		heap_node current = heap_Dij.HEAP_pop();
@@ -1240,7 +1240,7 @@ void Mesh3DScene::dijkstra(int i) {
 		}
 	}
 }
-/*Αλγόριθμος N-rings*/
+/*N-rings Algorithm*/
 void Mesh3DScene::N_ring_algorithm() {
 	for (int i = 0; i < m_model.getTriangles().size(); i++) {
 		is_projection.push_back(0);
@@ -1286,12 +1286,12 @@ void Mesh3DScene::N_ring_algorithm() {
 }
 
 //--- Heap functions ---//
-/* Αρχικοποίηση του σωρού*/
+/* Initializing heap*/
 void Heap::HEAP_init(int i) {
 	change_data(i, 0);
 	plithos = heap_D.size();
 }
-/* Αφαίρεση ρίζας*/
+/* Remove Heap*/
 heap_node Heap::HEAP_pop() {
 	int posCurrent, posLeft, posRight, pos;
 	heap_node pop_x = heap_D.front();
@@ -1306,10 +1306,10 @@ heap_node Heap::HEAP_pop() {
 		if (posLeft >= plithos) posLeft = -1;
 		if (posRight >= plithos) posRight = -1;
 
-		// Δεν έχει παιδιά
+		// No children
 		if (posLeft == -1 && posRight == -1) break;
 
-		// Έχει μόνο αριστερό παιδί
+		// Only left child
 		else if (posLeft != -1 && posRight == -1) {
 			if (heap_D[posCurrent].geodesic > heap_D[posLeft].geodesic) {
 				swap_heap_node(heap_D[posCurrent], heap_D[posLeft]);
@@ -1318,7 +1318,7 @@ heap_node Heap::HEAP_pop() {
 			else break;
 		}
 
-		// Έχει δύο παιδιά
+		// Have two children
 		else {
 			if (heap_D[posLeft].geodesic > heap_D[posRight].geodesic) pos = posRight;
 			else pos = posLeft;
@@ -1334,7 +1334,7 @@ heap_node Heap::HEAP_pop() {
 	}
 	return pop_x;
 }
-/* Ανακατάταξη κόμβων όταν αλλάζει τιμή ένας από αυτούς*/
+/* Reorder nodes when one of them changes value*/
 void Heap::change_data(int i, double x) {
 	int k;
 	for (k = 0; k < heap_D.size(); k++) {
@@ -1362,10 +1362,10 @@ void Heap::change_data(int i, double x) {
 		if (posLeft >= plithos) posLeft = -1;
 		if (posRight >= plithos) posRight = -1;
 
-		// Δεν έχει παιδιά
+		// No children
 		if (posLeft == -1 && posRight == -1) break;
 
-		// Έχει μόνο αριστερό παιδί
+		// Only left child
 		else if (posLeft != -1 && posRight == -1) {
 			if (heap_D[posCurrent].geodesic > heap_D[posLeft].geodesic) {
 				swap_heap_node(heap_D[posCurrent], heap_D[posLeft]);
@@ -1375,7 +1375,7 @@ void Heap::change_data(int i, double x) {
 			else break;
 		}
 
-		// Έχει δύο παιδιά
+		// Have two children
 		else {
 			if (heap_D[posLeft].geodesic > heap_D[posRight].geodesic) pos = posRight;
 			else pos = posLeft;
@@ -1391,21 +1391,21 @@ void Heap::change_data(int i, double x) {
 		}
 	}
 }
-/* Εκπτύπωση σωρού*/
+/* Print heap*/
 void Heap::HEAP_print() {
 	for (int i = 0; i < heap_D.size(); i++) {
 		cout << heap_D[i].geodesic << ",";
 	}
 	cout << endl;
 }
-/* Αλλάγη τιμή των κόμβων*/
+/* Change nodes*/
 void Heap::swap_heap_node(heap_node& dv1, heap_node& dv2) {
 	swap(dv1.index_vec, dv2.index_vec);
 	swap(dv1.geodesic, dv2.geodesic);
 }
 
 //---Task 4---//
-/* Προσθήκη του ιστουγράμματος του αντικειμένου σε έναν πίνακα MatrixXf*/
+/* Adding the histogram of the object to a MatrixXf array*/
 void Mesh3DScene::add_histObj_MatrixXf() {
 	int rows_matrix = histogramm_Obj.rows();
 	int cols_matrix = histogramm_Obj.cols();
@@ -1415,7 +1415,7 @@ void Mesh3DScene::add_histObj_MatrixXf() {
 		histogramm_Obj(2, i) = hist_obj_3(i) / hist_obj_3.sum();
 	}
 }
-/* Υπολογισμός του πίνακα ανομοιομορφίας*/
+/* Calculate dissimilarity matrix*/
 void Mesh3DScene::calc_dissimilarity_matrix(Eigen::MatrixXf& arr, Eigen::MatrixXf& diss_Matrix) {
 	int rows_matrix = arr.rows();
 	int cols_matrix = arr.cols();
@@ -1426,7 +1426,7 @@ void Mesh3DScene::calc_dissimilarity_matrix(Eigen::MatrixXf& arr, Eigen::MatrixX
 			diss_Matrix(i, j) = calc_error(v1, v2);
 		}
 	}
-	// Κανονικοποίηση πίνακα
+	// Normalization matrix
 	float max_val = diss_Matrix.maxCoeff();
 	for (int i = 0; i < rows_matrix; i++) {
 		for (int j = 0; j < rows_matrix; j++) {
@@ -1434,7 +1434,7 @@ void Mesh3DScene::calc_dissimilarity_matrix(Eigen::MatrixXf& arr, Eigen::MatrixX
 		}
 	}
 }
-/* Υπολογισμός του ιστογράμματος*/
+/* Calculation of the histogram*/
 void Mesh3DScene::calc_histogramm(double min_value, double max_value, std::vector<double>& data, Eigen::VectorXf& hist, std::string name) {
 	for (int i = 0; i < data.size(); i++) {
 		double norm = (data[i] - min_value) / (max_value - min_value);
@@ -1450,7 +1450,7 @@ void Mesh3DScene::calc_histogramm(double min_value, double max_value, std::vecto
 		}
 		hist[index_hist]++;
 	}
-	// Καταγραφή σε txt
+	// storing txt
 	ofstream myfile(name);
 	if (myfile.is_open()) {
 		for (int i = 0; i < hist.size(); i++) {
@@ -1461,7 +1461,7 @@ void Mesh3DScene::calc_histogramm(double min_value, double max_value, std::vecto
 	}
 	else cout << "Unable to open file";
 }
-/* ’νοιγμα του αρχείου που περιέχει την καμπυλότητα του αντικειμένου και προσθήκηκ σε ένα διάνυσμα*/
+/* Open the file containing the curvature of the object and addc to a vector*/
 void Mesh3DScene::open_curves(std::string file, std::vector<double>& cuerve) {
 	ifstream myReadFile;
 	myReadFile.open(file);
@@ -1474,7 +1474,7 @@ void Mesh3DScene::open_curves(std::string file, std::vector<double>& cuerve) {
 	}
 	myReadFile.close();
 }
-/* Προσθήκη του ιστουγράμματος του αντικειμένου σε έναν πίνακα MatrixXf*/
+/* Adding the histogram of the object to a MatrixXf array*/
 void Mesh3DScene::add_histProtein(int index, Eigen::MatrixXf& histogramms_Proteins) {
 	int rows_matrix = histogramms_Proteins.rows();
 	int cols_matrix = histogramms_Proteins.cols();
@@ -1482,7 +1482,7 @@ void Mesh3DScene::add_histProtein(int index, Eigen::MatrixXf& histogramms_Protei
 		histogramms_Proteins(index, i) = hist_obj_protein(i);
 	}
 }
-/* Υπολογισμός του πίνακα ανομοιομορφίας των πρωτεϊνών*/
+/* Calculation of the protein dissimilarity matrix*/
 void Mesh3DScene::calc_dissimilarity_matrix_combination(Eigen::MatrixXf& gauss, Eigen::MatrixXf& mean, Eigen::MatrixXf& diss_Matrix, std::string name, float pr_gauss) {
 	MatrixXf diss_gauss = MatrixXf::Zero(369, 369);
 	MatrixXf diss_mean = MatrixXf::Zero(369, 369);
@@ -1527,7 +1527,7 @@ void Mesh3DScene::calc_dissimilarity_matrix_combination(Eigen::MatrixXf& gauss, 
 }
 
 //---Task 5---//
-/* ’νοιγμα αρχείου που περιέχει τον πίνακα ανομοιομορφίας*/
+/* Open file containing disparity matrix*/
 void Mesh3DScene::open_dissimilarity_matrix(std::string file, Eigen::MatrixXf& diss_Matrix) {
 	ifstream myReadFile;
 	myReadFile.open(file);
@@ -1549,7 +1549,7 @@ void Mesh3DScene::open_dissimilarity_matrix(std::string file, Eigen::MatrixXf& d
 	}
 	myReadFile.close();
 }
-/* Υπολογισμός του πίνακα ομοιομορφίας των πρωτεϊνών με συγκεκριμένο κατώφλι*/
+/* Calculation of protein similarity matrix with specific threshold*/
 void Mesh3DScene::similar_protein(float Thres, std::string name) {
 	int rows_matrix = dissimilarity_matrix_proteins_bool.rows();
 	int cols_matrix = dissimilarity_matrix_proteins_bool.cols();
@@ -1573,7 +1573,7 @@ void Mesh3DScene::similar_protein(float Thres, std::string name) {
 	}
 	else cout << "Unable to open file";
 }
-/* Ταξινόμηση πρωτεϊνων*/
+/* Protein classification*/
 float Mesh3DScene::classification_protein(int teams[5], std::string name) {
 	int size_c = 369;
 	VectorXf c_correct = build_c_correct(teams, size_c);
@@ -1595,7 +1595,7 @@ float Mesh3DScene::classification_protein(int teams[5], std::string name) {
 		int class_prot = static_cast<int>(max_index(Rep));
 		c(i) = class_prot;
 	}
-	// Αποθήκευση των ταξινομήσεων c
+	// store classification c
 	ofstream myfile(name);
 	if (myfile.is_open()) {
 		for (int k = 0; k < c.rows(); k++) {
@@ -1605,7 +1605,7 @@ float Mesh3DScene::classification_protein(int teams[5], std::string name) {
 		myfile.close();
 	}
 	else cout << "Unable to open file";
-	// Υπολογισμός σφαλματος
+	// calculate error
 	VectorXf Rc = VectorXf::Zero(5);
 	for (int i = 0; i < 369; i++) {
 		if (c(i) == c_correct(i)) {
@@ -1620,7 +1620,7 @@ float Mesh3DScene::classification_protein(int teams[5], std::string name) {
 }
 
 //---Task 6---//
-/* ’νοιγμα αρχείου που περιέχει το ιστόγραμμα του αντικειμένου*/
+/* Open a file containing the histogram of the object*/
 void Mesh3DScene::open_hist(std::string name, Eigen::VectorXf& hist) {
 	ifstream myReadFile;
 	myReadFile.open(name);
@@ -1635,7 +1635,7 @@ void Mesh3DScene::open_hist(std::string name, Eigen::VectorXf& hist) {
 	}
 	myReadFile.close();
 }
-/* ’νοιγμα αρχείου που περιέχει την ταξινόμηση των πρωτεϊνων σε ομάδες*/
+/* Open a file containing the classification of proteins into groups*/
 void Mesh3DScene::open_class_weight_gauss(Eigen::VectorXf& c, std::string name) {
 	ifstream myReadFile;
 	myReadFile.open(name);
@@ -1653,7 +1653,7 @@ void Mesh3DScene::open_class_weight_gauss(Eigen::VectorXf& c, std::string name) 
 	}
 	myReadFile.close();
 }
-/* Εύρεση της πιο όμοιας πρωτεΐνης και προσθήκη σε διάνυσμα*/
+/* Find the most similar protein and add to a vector*/
 void Mesh3DScene::find_similar_vector() {
 	for (int i = 0; i < 41; i++) {
 		similar_test_data = VectorXf::Zero(369);
@@ -1672,7 +1672,7 @@ void Mesh3DScene::find_similar_vector() {
 			open_hist(hist_data_gauss, hist_obj_protein_dataset_gauss);
 			string hist_data_mean = getBasePath() + "resources/histogram/curvature_dataset/Mean/" + to_string(j) + ".txt";
 			open_hist(hist_data_mean, hist_obj_protein_dataset_mean);
-			// Υπολογισμός Ομοιομορφίας
+			// Uniformity Calculation
 			float sim_gauss = calc_error(hist_obj_protein_testset_gauss, hist_obj_protein_dataset_gauss);
 			float sim_mean = calc_error(hist_obj_protein_testset_mean, hist_obj_protein_dataset_mean);
 			float t = (WEIGHT_GAUSS * sim_gauss + (1 - WEIGHT_GAUSS) * sim_mean);
@@ -1683,7 +1683,7 @@ void Mesh3DScene::find_similar_vector() {
 		Vec_similar_protein(i) = index_min;
 	}
 }
-/* Υπολογισμός ποσοστού ανάκτησης*/
+/* Recovery rate calculation*/
 void Mesh3DScene::retriaval_degree(int teams[5]) {
 	int size_c = 41;
 	VectorXf c_correct = build_c_correct(teams, size_c);
@@ -1697,7 +1697,7 @@ void Mesh3DScene::retriaval_degree(int teams[5]) {
 		c_test[j] = c[Vec_similar_protein[j]];
 	}
 	cout << "T: " << T << "->";
-	// Εκπτήπωση των ομάδων του συνόλου δοκιμής
+	// Print the groups of the test set
 	print_VectorXf(c_test);
 	VectorXf Rc = VectorXf::Zero(5);
 	for (int j = 0; j < Vec_similar_protein.rows(); j++) {
@@ -1711,7 +1711,7 @@ void Mesh3DScene::retriaval_degree(int teams[5]) {
 }
 
 //---Task 7---//
-/* Υπολογισμός του πίνακα ανομοιομορφίας για τις φυσικοχημικές ιδιότητες*/
+/* Calculation of the disparity matrix for the physicochemical properties*/
 void Mesh3DScene::calc_dissimilarity_matrix_prop(Eigen::MatrixXf& arr_histogramms, Eigen::MatrixXf& diss_matrix, std::string name) {
 	for (int i = 0; i < 369; i++) {
 		for (int j = 0; j < 369; j++) {
@@ -1739,7 +1739,7 @@ void Mesh3DScene::calc_dissimilarity_matrix_prop(Eigen::MatrixXf& arr_histogramm
 	}
 	else cout << "Unable to open file";
 }
-/* Υπολογισμός του πίνακα ανομοιομορφίας για όλες τις φυσικοχημικές ιδιότητες*/
+/* Calculation of the disparity matrix for all physicochemical properties*/
 void Mesh3DScene::calc_dissimilarity_matrix_prop_total(std::string name) {
 	diss_properties_total = (diss_properties_col_0 + diss_properties_col_1 + diss_properties_col_2) / 3;
 	float max_val = diss_properties_total.maxCoeff();
@@ -1761,7 +1761,7 @@ void Mesh3DScene::calc_dissimilarity_matrix_prop_total(std::string name) {
 	}
 	else cout << "Unable to open file";
 }
-/* Υπολογισμός του πίνακα ομοιομορφίας των πρωτεϊνών με συγκεκριμένο κατώφλι για τις φυσικοχημικές ιδιότητες*/
+/* Calculation of the protein uniformity matrix with a certain threshold for the physicochemical properties*/
 void Mesh3DScene::similar_prop(float Thres, Eigen::MatrixXf& diss_matrix, std::string name) {
 	int rows_matrix = diss_matrix_prop_bool.rows();
 	int cols_matrix = diss_matrix_prop_bool.cols();
@@ -1785,7 +1785,7 @@ void Mesh3DScene::similar_prop(float Thres, Eigen::MatrixXf& diss_matrix, std::s
 	}
 	else cout << "Unable to open file";
 }
-/* Ταξινόμηση πρωτεϊνων*/
+/* Protein classification*/
 void Mesh3DScene::classification_protein_prop(Eigen::MatrixXf& diss_matrix, Eigen::VectorXf& c) {
 	int teams[5] = { 44, 116, 161, 226, 368 };
 	int size_c = 369;
@@ -1818,7 +1818,7 @@ void Mesh3DScene::classification_protein_prop(Eigen::MatrixXf& diss_matrix, Eige
 	cout << "classification: " << endl;
 	print_VectorXf(c);
 }
-/* Εύρεση της πιο όμοιας πρωτεΐνης και προσθήκη σε διάνυσμα σύμφωνα με τις φυσικοχημικές ιδιότητες*/
+/* Finding the most similar protein and adding it to a vector according to the physicochemical properties*/
 void Mesh3DScene::find_similar_vector_prop(Eigen::VectorXf& Vec_similar, std::string propertie) {
 	for (int i = 0; i < 41; i++) {
 		similar_test_data_prop = VectorXf::Zero(369);
@@ -1831,7 +1831,7 @@ void Mesh3DScene::find_similar_vector_prop(Eigen::VectorXf& Vec_similar, std::st
 			string name_data = to_string(j) + ".txt";
 			string hist_data_prop = getBasePath() + "resources/histogram/properties_dataset/" + propertie + to_string(j) + ".txt";
 			open_hist(hist_data_prop, hist_obj_protein_dataset_prop);
-			// Υπολογισμός Ομοιομορφίας
+			// Uniformity Calculation
 			float sim_prop = calc_error(hist_obj_protein_testset_prop, hist_obj_protein_dataset_prop);
 			similar_test_data_prop(j) = sim_prop;
 		}
@@ -1840,7 +1840,7 @@ void Mesh3DScene::find_similar_vector_prop(Eigen::VectorXf& Vec_similar, std::st
 		Vec_similar(i) = index_min;
 	}
 }
-/* Εύρεση της πιο όμοιας πρωτεΐνης και προσθήκη σε διάνυσμα για όλες τις φυσικοχημικές ιδιότητες*/
+/* Finding the most similar protein and adding to a vector for all physicochemical properties*/
 void Mesh3DScene::find_similar_vector_prop_total() {
 	for (int i = 0; i < 41; i++) {
 		similar_test_data_prop = VectorXf::Zero(369);
@@ -1863,7 +1863,7 @@ void Mesh3DScene::find_similar_vector_prop_total() {
 			open_hist(hist_data_prop_0, hist_obj_protein_dataset_prop_0);
 			open_hist(hist_data_prop_1, hist_obj_protein_dataset_prop_1);
 			open_hist(hist_data_prop_2, hist_obj_protein_dataset_prop_2);
-			// Υπολογισμός Ομοιομορφίας
+			// Uniformity Calculation
 			float sim_prop_0 = calc_error(hist_obj_protein_testset_prop_0, hist_obj_protein_dataset_prop_0);
 			float sim_prop_1 = calc_error(hist_obj_protein_testset_prop_1, hist_obj_protein_dataset_prop_1);
 			float sim_prop_2 = calc_error(hist_obj_protein_testset_prop_2, hist_obj_protein_dataset_prop_2);
@@ -1874,7 +1874,7 @@ void Mesh3DScene::find_similar_vector_prop_total() {
 		Vec_similar_protein_col_total(i) = index_min;
 	}
 }
-/* Υπολογισμός ποσοστού ανάκτησης*/
+/*Calculate retrival rate*/
 void Mesh3DScene::retriaval_degree_prop(Eigen::VectorXf& Vec_similar, Eigen::VectorXf& c) {
 	int size_c = 41;
 	int teams_test[5] = { 4, 12, 17, 22, 40 };
